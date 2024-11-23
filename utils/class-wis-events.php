@@ -21,6 +21,7 @@ class WIS_Events {
         $this->loader->add_action('add_meta_boxes', $this, 'add_event_meta_boxes');
         $this->loader->add_action('save_post', $this, 'save_event_meta');
         $this->loader->add_action('admin_notices', $this, '_wis_admin_notices');
+        $this->loader->add_action('the_content', $this, 'display_event_meta_on_single_page');
     }
 
     public function define_public_hooks() {
@@ -69,7 +70,32 @@ class WIS_Events {
             'menu_icon'          => 'dashicons-calendar',
         ];
 
-        register_post_type('event', $args);
+        register_post_type('wis_event', $args);
+    }
+
+    public function display_event_meta_on_single_page($content) {
+        if (is_singular('wis_event')) {
+            $post_id = get_the_ID();
+
+            $start_date   = $this->get_meta_value($post_id, '_wis_event_start_date');
+            $end_date     = $this->get_meta_value($post_id, '_wis_event_end_date');
+            $start_time   = $this->get_meta_value($post_id, '_wis_event_start_time');
+            $end_time     = $this->get_meta_value($post_id, '_wis_event_end_time');
+            $location     = $this->get_meta_value($post_id, '_wis_event_location');
+            
+            $event_details = '<div class="wis-event">';
+            $event_details .= '<h3>Event Details</h3>';
+            $event_details .= '<p><strong>Start Date:</strong> ' . esc_html(date('l jS, Y', strtotime($start_date))) . '</p>';
+            $event_details .= '<p><strong>End Date:</strong> ' . esc_html(date('l jS, Y', strtotime($end_date))) . '</p>';
+            $event_details .= '<p><strong>Start Time:</strong> ' . esc_html(date('H:i A (e)', strtotime($start_time))) . '</p>';
+            $event_details .= '<p><strong>End Time:</strong> ' . esc_html(date('h:i A (e)', strtotime($end_time))) . '</p>';
+            $event_details .= '<p><strong>Location:</strong> ' . esc_html($location) . '</p>';
+            $event_details .= '</div>';
+            
+            $content .= $event_details;
+        }
+
+        return $content;
     }
 
     public function add_event_meta_boxes() {
@@ -183,7 +209,7 @@ class WIS_Events {
                 return;  
             }
 
-            // TODO: handle validation errors
+            // TODO: handle validation errors in Block editor supported way.
             // Errors? Display them
             echo '<div class="">';
             echo '<ul>';
@@ -254,5 +280,9 @@ class WIS_Events {
 
     private function get_plugin_version() {
         return WIS_EVENTS_VERSION;
+    }
+
+    private function get_meta_value(int $post_id, string $meta_key, bool $single = true) {
+        return get_post_meta($post_id, $meta_key, $single);
     }
 }
