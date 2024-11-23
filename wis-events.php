@@ -4,7 +4,7 @@
  * Description: A sample plugin to manage and display events in WordPress via Custom Post Types.
  * Author: Cornelius Udeh
  * Author URI: http://udeh.ng
- * Plugin URI: http://udeh.ng
+ * Plugin URI: https://github.com/cornzie/SampleWpEventsPlugin
  * 
  * Version: 1.0.0
  * Requires PHP: 8.2
