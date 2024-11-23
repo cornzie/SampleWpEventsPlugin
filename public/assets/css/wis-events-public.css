@@ -1,0 +1,19 @@
+/**
+ * All of the CSS for your public-facing functionality should be
+ * included in this file.
+ */
+
+ .wis-events-list {
+    margin: 20px 0;
+}
+
+.wis-event {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+.wis-event h3 {
+    margin: 0 0 10px;
+}
