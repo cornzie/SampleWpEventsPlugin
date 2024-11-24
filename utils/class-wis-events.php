@@ -84,7 +84,7 @@ class WIS_Events {
             $location     = $this->get_meta_value($post_id, '_wis_event_location');
             
             $event_details = '<div class="wis-event">';
-            $event_details .= '<h3>Event Details</h3>';
+            $event_details .= '<h3>Event Details (For Demo ONLY.)</h3>';
             $event_details .= '<p><strong>Start Date:</strong> ' . esc_html(date('l jS, Y', strtotime($start_date))) . '</p>';
             $event_details .= '<p><strong>End Date:</strong> ' . esc_html(date('l jS, Y', strtotime($end_date))) . '</p>';
             $event_details .= '<p><strong>Start Time:</strong> ' . esc_html(date('H:i A (e)', strtotime($start_time))) . '</p>';
@@ -103,7 +103,7 @@ class WIS_Events {
             'wis_event_details',
             __('Event Details', 'wis-events'),
             [$this, 'render_event_meta_boxes'],
-            'event',
+            'wis_event',
             'normal',
             'default'
         );
