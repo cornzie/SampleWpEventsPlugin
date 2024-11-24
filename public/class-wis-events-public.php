@@ -58,7 +58,7 @@ class WIS_Events_Public
         // Parse any attributes passed to the shortcode
         $atts = shortcode_atts([
             'number' => 5, // Default: show 5 events
-        ], $atts, 'wis_events');
+        ], $atts);
 
         // Query filters options
         $query_args = [
