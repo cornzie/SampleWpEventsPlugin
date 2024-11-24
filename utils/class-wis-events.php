@@ -1,9 +1,26 @@
 <?php
 
+/**
+ * Class WIS_Events (Plugin Manager)
+ * 
+ * This houses functionalities considered 'in between' admin and public.
+ * It's a utility class that handles core plugin functionalities
+ * Not sure if something is admin or public specific? write it here for now
+ * 
+ */
 class WIS_Events {
 
+    /**
+     * WIS_Events_Loader loader
+     *
+     * @var WIS_Events_Loader the loader we use to add actions and filters
+     */
     private $loader;
 
+
+    /**
+     * A new instance of the WIS Events Plugin Manager
+     */
     public function __construct()
     {
         $this->loader = new WIS_Events_Loader();
@@ -12,10 +29,20 @@ class WIS_Events {
         $this->define_public_hooks();
     }
 
+    /**
+     * Bootstrap all admin actions and filter hooks
+     *
+     * @return void
+     */
     public function define_admin_hooks() {
         // $plugin_admin = new WIS_Events_Admin();
     }
 
+    /**
+     * Bootstrap all utility actions and filter hooks
+     *
+     * @return void
+     */
     public function define_util_hooks() {
         $this->loader->add_action('init', $this, 'register_event_post_type');
         $this->loader->add_action('add_meta_boxes', $this, 'add_event_meta_boxes');
@@ -24,12 +51,25 @@ class WIS_Events {
         $this->loader->add_action('the_content', $this, 'display_event_meta_on_single_page');
     }
 
+    /**
+     * Bootstrap all public actions and filter hooks
+     *
+     * @return void
+     */
     public function define_public_hooks() {
         $plugin_public = new WIS_Events_Public($this->get_plugin_name(), $this->get_plugin_version());
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
         $this->loader->add_shortcode('display_wis_events', $plugin_public, 'render_events_shortcode');
     }
 
+
+    /* Begin management */
+
+    /**
+     * Registers the custom plugin type
+     *
+     * @return void
+     */
     public function register_event_post_type() {
         $labels = [
             'name'               => __('Events', 'wis-events'),
@@ -73,7 +113,19 @@ class WIS_Events {
         register_post_type('wis_event', $args);
     }
 
+    /**
+     * Builds HTML for displaying event details on the frontend
+     *
+     * @param mixed $content
+     * @return string
+     */
     public function display_event_meta_on_single_page($content) {
+
+        if ( has_block( 'create-block/wis-event-details-block', $content ) ) {
+            return; // Block exists, don't show meta boxes
+        }
+    
+
         if (is_singular('wis_event')) {
             $post_id = get_the_ID();
 
@@ -98,10 +150,17 @@ class WIS_Events {
         return $content;
     }
 
+    /**
+     * Register custom fields for collecting event details
+     * 
+     * TODO: move to admin namespace
+     *
+     * @return void
+     */
     public function add_event_meta_boxes() {
         add_meta_box(
             'wis_event_details',
-            __('Event Details', 'wis-events'),
+            __('Event Details (For Demo ONLY)', 'wis-events'),
             [$this, 'render_event_meta_boxes'],
             'wis_event',
             'normal',
@@ -116,6 +175,11 @@ class WIS_Events {
      * @return void
      */
     public function render_event_meta_boxes($post) {
+        if ( has_block( 'create-block/wis-event-details-block', $post ) ) {
+            echo "<p> Your post has the WIS event details block </p>";
+            return; // Block exists, don't show meta boxes
+        }
+    
         // Get current meta data values
         $start_date = get_post_meta($post->ID, '_wis_event_start_date', true);
         $end_date = get_post_meta($post->ID, '_wis_event_end_date', true);
@@ -158,6 +222,12 @@ class WIS_Events {
         <?php
     }
 
+    /**
+     * Stores event meta data in DB
+     *
+     * @param int $post_id
+     * @return void
+     */
     public function save_event_meta($post_id) {
 
         // Skip if POST data is empty
@@ -193,7 +263,7 @@ class WIS_Events {
     }
 
     /**
-     * Retrieve and display errors
+     * [Draft] Retrieve and display errors
      * @since 1.0.0
      * @return void
      */ 
@@ -225,6 +295,17 @@ class WIS_Events {
 
     }
 
+    /**
+     * Performs quick pre-save checks
+     * 
+     * - Checks and verifies nonce for security
+     * - Excludes meta data from auto save to prevent accidentally overriding stuff
+     * - Checks that user can update the event
+     *
+     * @param integer $post_id
+     * @param array $post_request
+     * @return boolean
+     */
     private function isValidSaveRequest(int $post_id, array $post_request) {
 
         return 
@@ -234,6 +315,16 @@ class WIS_Events {
             current_user_can('edit_post', $post_id);
     }
 
+    /**
+     * Sanity checks the data to be saved
+     * - Prevents saving event data that could be problematic such as:
+     * - - $start_date < $end_date
+     * - - $start_time < $end_time
+     *
+     * @param integer $post_id
+     * @param array $post_request
+     * @return void
+     */
     private function validated(int $post_id, array $post_request) {
         $errors = [];
         $start_date = isset($post_request['_wis_event_start_date']) ? sanitize_text_field($post_request['_wis_event_start_date']) : '';
@@ -270,18 +361,43 @@ class WIS_Events {
         return true;
     }
 
+    /**
+     * Ignition: Runs the loader
+     * Actually registers the bootstrapped actions and filters
+     * Runs the plugin functions
+     *
+     * @return void
+     */
     public function run() {
         $this->loader->run();
     }
 
+    /**
+     * Helper: get the plugin name
+     *
+     * @return string
+     */
     private function get_plugin_name() {
         return 'wis-events';
     }
 
+    /**
+     * Helper: Get the current plugin version
+     *
+     * @return string
+     */
     private function get_plugin_version() {
         return WIS_EVENTS_VERSION;
     }
 
+    /**
+     * Helper: get an event meta data value
+     *
+     * @param integer $post_id
+     * @param string $meta_key
+     * @param boolean $single
+     * @return mixed
+     */
     private function get_meta_value(int $post_id, string $meta_key, bool $single = true) {
         return get_post_meta($post_id, $meta_key, $single);
     }

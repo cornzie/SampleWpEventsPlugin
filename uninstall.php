@@ -2,7 +2,7 @@
 /**
  * Triggered when the plugin is uninstalled.
  *
- * Deletes all custom post type 'event' posts and their metadata.
+ * Deletes all custom post type 'wis_event' posts and their metadata.
  */
 
 // Exit if accessed directly.

@@ -1,29 +1,66 @@
 <?php
 
+/**
+ * The class that manages user facing content
+ */
 class WIS_Events_Public
 {
-    private $plugin_name;
-    private $version;
+    /**
+     * The plugin name 
+     *
+     * @var string
+     */
+    private string $plugin_name;
 
-    public function __construct($plugin_name, $version)
+    /**
+     * The version of the plugin in use
+     *
+     * @var string
+     */
+    private string $version;
+
+    /**
+     * A new public manager instance
+     *
+     * @param string $plugin_name
+     * @param string $version
+     * @since 1.0.0
+     * @author Cornelius <cornelius@udeh.ng>
+     */
+    public function __construct(string $plugin_name, string $version)
     {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
     }
 
-    public function enqueue_styles()
+    /**
+     * Enqueue styles
+     *
+     * @return void
+     * @since 1.0.0
+     * @author Cornelius <cornelius@udeh.ng>
+     */
+    public function enqueue_styles(): void
     {
         wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'assets/css/wis-events-public.css', array(), $this->version, 'all');
     }
 
-    public function render_events_shortcode($atts)
+    /**
+     * Render events based on short code usage
+     *
+     * @param mixed $atts The attributes passed through to the short code
+     * @return string The HTML output
+     * @since 1.0.0
+     * @author Cornelius <cornelius@udeh.ng>
+     */
+    public function render_events_shortcode($atts): string
     {
         // Parse any attributes passed to the shortcode
         $atts = shortcode_atts([
             'number' => 5, // Default: show 5 events
         ], $atts, 'wis_events');
 
-        // Query the events
+        // Query filters options
         $query_args = [
             'post_type' => 'wis_event',
             'posts_per_page' => $atts['number'],
@@ -32,6 +69,7 @@ class WIS_Events_Public
             'order' => 'ASC',
         ];
 
+        // The actual query
         $events = new WP_Query($query_args);
 
         if (!$events->have_posts()) {

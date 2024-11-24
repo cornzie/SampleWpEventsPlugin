@@ -3,6 +3,8 @@
  * Class WIS_Events_Loader
  *
  * This class handles the loading of actions and filters for the plugin.
+ * For inspiration:
+ * @see https://github.com/DevinVinson/WordPress-Plugin-Boilerplate/blob/master/plugin-name/includes/class-plugin-name-loader.php
  */
 class WIS_Events_Loader {
 
